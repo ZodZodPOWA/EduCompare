@@ -2,8 +2,8 @@
 // config.php
 $host = 'localhost';
 $dbname = 'EduCompare';
-$username = 'root'; // Remplacez par votre utilisateur MySQL
-$password = '';     // Remplacez par votre mot de passe MySQL
+$username = 'votre_username'; // Remplacez par votre utilisateur MySQL
+$password = 'votre_modp';     // Remplacez par votre mot de passe MySQL
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
