@@ -22,15 +22,11 @@ Avant de commencer, assurez-vous d'avoir installé les éléments suivants sur v
 
     - Importez le fichier SQL fourni dans le dossier `sql` pour créer la structure de la base de données.
 
-3. **Configuration du serveur web**
-
-    - Configurez votre serveur web pour qu'il pointe vers le répertoire où vous avez cloné ce dépôt.
-
-4. **Configuration de l'environnement PHP**
+3. **Configuration de l'environnement PHP**
 
     - Assurez-vous que PHP est configuré correctement sur votre serveur web.
 
-5. **Configuration des paramètres de connexion à la base de données**
+4. **Configuration des paramètres de connexion à la base de données**
 
     - Modifiez les paramètres de connexion à la base de données dans le fichier `login.php` pour correspondre à votre configuration locale.
       
@@ -41,7 +37,7 @@ Avant de commencer, assurez-vous d'avoir installé les éléments suivants sur v
     $dbName = "EduCompare";
     ```
 
-6. **Exploration de l'application**
+5. **Exploration de l'application**
 
     - Vous pouvez maintenant explorer l'application EduCompare.
 
