@@ -7,9 +7,9 @@ CREATE TABLE IF NOT EXISTS Utilisateur (
     idUtilisateur INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     prenom VARCHAR(100) NOT NULL,
-    pseudonyme VARCHAR(100) NOT NULL UNIQUE,
+    username VARCHAR(100) NOT NULL UNIQUE,
     motDePasse VARCHAR(255) NOT NULL,
-    role ENUM('Admin', 'Etudiant', 'Parent') NOT NULL
+    situation ENUM('Admin', 'Etudiant', 'Parent') NOT NULL
 );
 
 -- Création de la table Formation
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS Formation (
     uniforme BOOLEAN NOT NULL,
     internat BOOLEAN NOT NULL,
     tauxReussite DECIMAL(5, 2) NOT NULL,
-    logo BLOB,
+    logo LONGBLOB,
     pays VARCHAR(100) NOT NULL
 );
 
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS Correspondance (
 );
 
 -- Insertion de données dans la table Utilisateur
-INSERT INTO Utilisateur (nom, prenom, pseudonyme, motDePasse, role) VALUES
+INSERT INTO Utilisateur (nom, prenom, username, motDePasse, situation) VALUES
 ('Admin', 'Principal', 'admin01', 'adminpassword', 'Admin'),
 ('Dupont', 'Jean', 'jean.dupont', 'password123', 'Etudiant'),
 ('Martin', 'Sophie', 'sophie.martin', 'password456', 'Parent');
