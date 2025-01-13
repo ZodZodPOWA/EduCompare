@@ -9,21 +9,19 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // Obtenir le chemin de l'URL
 $request = explode('/', trim($_SERVER['PATH_INFO'], '/'));
-
-// Route principale
 $resource = $request[0] ?? null;
-$id = $request[1] ?? null; // ID optionnel pour certaines ressources
+$id = $request[1] ?? null;
 
 // Gestion des routes
 switch ($resource) {
     case 'utilisateurs':
-        handleUsers($method, $id, $pdo);
+        handleUtilisateurRoutes($method, $id, $pdo);
         break;
     case 'formations':
-        handleFormations($method, $id, $pdo);
+        handleFormationRoutes($method, $id, $pdo);
         break;
     case 'recherches':
-        handleRecherches($method, $id, $pdo);
+        handleRechercheRoutes($method, $id, $pdo);
         break;
     default:
         http_response_code(404);
@@ -31,121 +29,149 @@ switch ($resource) {
         break;
 }
 
-// Gestion des utilisateurs
-function handleUsers($method, $id, $pdo) {
+// Routes pour les utilisateurs
+function handleUtilisateurRoutes($method, $id, $pdo) {
     switch ($method) {
         case 'GET':
-            if ($id) {
-                $stmt = $pdo->prepare("SELECT * FROM Utilisateur WHERE idUtilisateur = ?");
-                $stmt->execute([$id]);
-                $user = $stmt->fetch(PDO::FETCH_ASSOC);
-                echo json_encode($user ?: ['message' => 'Utilisateur non trouvé']);
-            } else {
-                $stmt = $pdo->query("SELECT * FROM Utilisateur");
-                $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                echo json_encode($users);
-            }
+            $id ? getUtilisateur($id, $pdo) : getUtilisateurs($pdo);
             break;
         case 'POST':
-            $data = json_decode(file_get_contents('php://input'), true);
-            $stmt = $pdo->prepare("INSERT INTO Utilisateur (nom, prenom, pseudonyme, motDePasse, role) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$data['nom'], $data['prenom'], $data['pseudonyme'], $data['motDePasse'], $data['role']]);
-            echo json_encode(['message' => 'Utilisateur créé', 'id' => $pdo->lastInsertId()]);
+            createUtilisateur($pdo);
             break;
         case 'PUT':
-            if ($id) {
-                $data = json_decode(file_get_contents('php://input'), true);
-                $stmt = $pdo->prepare("UPDATE Utilisateur SET nom = ?, prenom = ?, pseudonyme = ?, motDePasse = ?, role = ? WHERE idUtilisateur = ?");
-                $stmt->execute([$data['nom'], $data['prenom'], $data['pseudonyme'], $data['motDePasse'], $data['role'], $id]);
-                echo json_encode(['message' => 'Utilisateur mis à jour']);
-            } else {
-                http_response_code(400);
-                echo json_encode(['message' => 'ID requis pour la mise à jour']);
-            }
+            $id ? updateUtilisateur($id, $pdo) : badRequest('ID requis pour la mise à jour');
             break;
         case 'DELETE':
-            if ($id) {
-                $stmt = $pdo->prepare("DELETE FROM Utilisateur WHERE idUtilisateur = ?");
-                $stmt->execute([$id]);
-                echo json_encode(['message' => 'Utilisateur supprimé']);
-            } else {
-                http_response_code(400);
-                echo json_encode(['message' => 'ID requis pour la suppression']);
-            }
+            $id ? deleteUtilisateur($id, $pdo) : badRequest('ID requis pour la suppression');
             break;
         default:
-            http_response_code(405);
-            echo json_encode(['message' => 'Méthode non autorisée']);
+            methodNotAllowed();
             break;
     }
 }
 
-// Gestion des formations
-function handleFormations($method, $id, $pdo) {
+function getUtilisateur($id, $pdo) {
+    $stmt = $pdo->prepare("SELECT * FROM Utilisateur WHERE idUtilisateur = ?");
+    $stmt->execute([$id]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    echo json_encode($user ?: ['message' => 'Utilisateur introuvables']);
+}
+
+function getUtilisateurs($pdo) {
+    $stmt = $pdo->query("SELECT * FROM Utilisateur");
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode($users);
+}
+
+function createUtilisateur($pdo) {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $stmt = $pdo->prepare("INSERT INTO Utilisateur (nom, prenom, pseudonyme, motDePasse, role) VALUES (?, ?, ?, ?, ?)");
+    $stmt->execute([$data['nom'], $data['prenom'], $data['pseudonyme'], $data['motDePasse'], $data['role']]);
+    echo json_encode(['message' => 'Utilisateur créé', 'id' => $pdo->lastInsertId()]);
+}
+
+function updateUtilisateur($id, $pdo) {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $stmt = $pdo->prepare("UPDATE Utilisateur SET nom = ?, prenom = ?, pseudonyme = ?, motDePasse = ?, role = ? WHERE idUtilisateur = ?");
+    $stmt->execute([$data['nom'], $data['prenom'], $data['pseudonyme'], $data['motDePasse'], $data['role'], $id]);
+    echo json_encode(['message' => 'Utilisateur mis à jour']);
+}
+
+function deleteUtilisateur($id, $pdo) {
+    $stmt = $pdo->prepare("DELETE FROM Utilisateur WHERE idUtilisateur = ?");
+    $stmt->execute([$id]);
+    echo json_encode(['message' => 'Utilisateur supprimé']);
+}
+
+function handleFormationRoutes($method, $id, $pdo) {
     switch ($method) {
         case 'GET':
-            if ($id) {
-                $stmt = $pdo->prepare("SELECT * FROM Formation WHERE idFormation = ?");
-                $stmt->execute([$id]);
-                $formation = $stmt->fetch(PDO::FETCH_ASSOC);
-                echo json_encode($formation ?: ['message' => 'Formation non trouvée']);
-            } else {
-                $stmt = $pdo->query("SELECT * FROM Formation");
-                $formations = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                echo json_encode($formations);
-            }
+            $id ? getFormation($id, $pdo) : getFormations($pdo);
             break;
         case 'POST':
-            $data = json_decode(file_get_contents('php://input'), true);
-            $stmt = $pdo->prepare("INSERT INTO Formation (nom, description, prix, typeEcole, langues, uniforme, internat, tauxReussite) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([
-                $data['nom'], $data['description'], $data['prix'], $data['typeEcole'],
-                $data['langues'], $data['uniforme'], $data['internat'], $data['tauxReussite']
-            ]);
-            echo json_encode(['message' => 'Formation créée', 'id' => $pdo->lastInsertId()]);
+            createFormation($pdo);
             break;
         case 'DELETE':
-            if ($id) {
-                $stmt = $pdo->prepare("DELETE FROM Formation WHERE idFormation = ?");
-                $stmt->execute([$id]);
-                echo json_encode(['message' => 'Formation supprimée']);
-            } else {
-                http_response_code(400);
-                echo json_encode(['message' => 'ID requis pour la suppression']);
-            }
+            $id ? deleteFormation($id, $pdo) : badRequest('ID requis pour la suppression');
             break;
         default:
-            http_response_code(405);
-            echo json_encode(['message' => 'Méthode non autorisée']);
+            methodNotAllowed();
             break;
     }
 }
 
-// Gestion des recherches
-function handleRecherches($method, $id, $pdo) {
+function getFormation($id, $pdo) {
+    $stmt = $pdo->prepare("SELECT * FROM Formation WHERE idFormation = ?");
+    $stmt->execute([$id]);
+    $formation = $stmt->fetch(PDO::FETCH_ASSOC);
+    echo json_encode($formation ?: ['message' => 'Formation non trouvée']);
+}
+
+function getFormations($pdo) {
+    $stmt = $pdo->query("SELECT * FROM Formation");
+    $formations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode($formations);
+}
+
+function createFormation($pdo) {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $stmt = $pdo->prepare("INSERT INTO Formation (nom, description, prix, typeEcole, langues, uniforme, internat, tauxReussite) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([
+        $data['nom'], $data['description'], $data['prix'], $data['typeEcole'],
+        $data['langues'], $data['uniforme'], $data['internat'], $data['tauxReussite']
+    ]);
+    echo json_encode(['message' => 'Formation créée', 'id' => $pdo->lastInsertId()]);
+}
+
+function deleteFormation($id, $pdo) {
+    $stmt = $pdo->prepare("DELETE FROM Formation WHERE idFormation = ?");
+    $stmt->execute([$id]);
+    echo json_encode(['message' => 'Formation supprimée']);
+}
+
+
+function handleRechercheRoutes($method, $id, $pdo) {
     switch ($method) {
         case 'GET':
-            if ($id) {
-                $stmt = $pdo->prepare("SELECT * FROM Recherche WHERE idRecherche = ?");
-                $stmt->execute([$id]);
-                $recherche = $stmt->fetch(PDO::FETCH_ASSOC);
-                echo json_encode($recherche ?: ['message' => 'Recherche non trouvée']);
-            } else {
-                $stmt = $pdo->query("SELECT * FROM Recherche");
-                $recherches = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                echo json_encode($recherches);
-            }
+            $id ? getRecherche($id, $pdo) : getRecherches($pdo);
             break;
         case 'POST':
-            $data = json_decode(file_get_contents('php://input'), true);
-            $stmt = $pdo->prepare("INSERT INTO Recherche (idUtilisateur, dateRecherche) VALUES (?, ?)");
-            $stmt->execute([$data['idUtilisateur'], $data['dateRecherche']]);
-            echo json_encode(['message' => 'Recherche créée', 'id' => $pdo->lastInsertId()]);
+            createRecherche($pdo);
             break;
         default:
-            http_response_code(405);
-            echo json_encode(['message' => 'Méthode non autorisée']);
+            methodNotAllowed();
             break;
     }
+}
+
+function getRecherche($id, $pdo) {
+    $stmt = $pdo->prepare("SELECT * FROM Recherche WHERE idRecherche = ?");
+    $stmt->execute([$id]);
+    $recherche = $stmt->fetch(PDO::FETCH_ASSOC);
+    echo json_encode($recherche ?: ['message' => 'Recherche non trouvée']);
+}
+
+function getRecherches($pdo) {
+    $stmt = $pdo->query("SELECT * FROM Recherche");
+    $recherches = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode($recherches);
+}
+
+function createRecherche($pdo) {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $stmt = $pdo->prepare("INSERT INTO Recherche (idUtilisateur, dateRecherche) VALUES (?, ?)");
+    $stmt->execute([$data['idUtilisateur'], $data['dateRecherche']]);
+    echo json_encode(['message' => 'Recherche créée', 'id' => $pdo->lastInsertId()]);
+}
+
+// Gestion des erreurs
+function badRequest($message) {
+    http_response_code(400);
+    echo json_encode(['message' => $message]);
+}
+
+function methodNotAllowed() {
+    http_response_code(405);
+    echo json_encode(['message' => 'Méthode non autorisée']);
 }
 ?>
