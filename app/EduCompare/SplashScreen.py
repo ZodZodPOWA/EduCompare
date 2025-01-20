@@ -54,7 +54,7 @@ def main(page: ft.Page):
 
     # Mettre à jour la barre de progression
     def update_progress_bar():
-        for i in range(0, 101, 1):
+        for i in range(0, 101, 5):
             progress_bar.value = i / 100  # MaJ de la valeur de la barre
             page.update()
             time.sleep(0.1)
