@@ -31,7 +31,7 @@ def login_page_view(page: ft.Page):
         "/login",
         [
             ft.Image(
-                src="https://datadice.whf.bz/eduCompare.png",
+                src="https://datadice.whf.bz/img/eduCompare.png",
                 width=250,
                 height=250,
                 fit=ft.ImageFit.CONTAIN,

@@ -12,7 +12,7 @@ def main(page: ft.Page):
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
     img = ft.Image(
-        src="https://datadice.whf.bz/eduCompare.png",
+        src="https://datadice.whf.bz/img/eduCompare.png",
         width=500,
         height=500,
         fit=ft.ImageFit.CONTAIN,
